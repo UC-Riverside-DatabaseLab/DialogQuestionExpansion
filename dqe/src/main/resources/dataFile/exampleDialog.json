@@ -1,0 +1,205 @@
+{
+    "UUID": "bf26c9bc-6e35-3af1-9333-d342ff6c0fe3",
+    "dialogue_id": "14_00103",
+    "services": [
+      "Events_1"
+    ],
+    "turns": [
+      {
+        "frames": [
+          {
+            "service": "Events_1",
+            "slots": [],
+            "state": {
+              "active_intent": "BuyEventTickets",
+              "requested_slots": [],
+              "slot_values": {}
+            }
+          }
+        ],
+        "speaker": "USER",
+        "utterance": "I'd like to reserve tickets to an event."
+      },
+      {
+        "frames": [
+          {
+            "actions": [
+              {
+                "act": "REQUEST",
+                "slot": "number_of_seats",
+                "values": []
+              },
+              {
+                "act": "REQUEST",
+                "slot": "event_name",
+                "values": []
+              },
+              {
+                "act": "REQUEST",
+                "slot": "date",
+                "values": []
+              }
+            ],
+            "service": "Events_1",
+            "slots": []
+          }
+        ],
+        "speaker": "SYSTEM",
+        "utterance": "How many tickets would you like to reserve? Is there a certain event that you have in mind? Do you know when the event will occur?"
+      },
+      {
+        "frames": [
+          {
+            "service": "Events_1",
+            "slots": [
+              {
+                "exclusive_end": 43,
+                "slot": "date",
+                "start": 26
+              },
+              {
+                "exclusive_end": 82,
+                "slot": "event_name",
+                "start": 62
+              }
+            ],
+            "state": {
+              "active_intent": "BuyEventTickets",
+              "requested_slots": [],
+              "slot_values": {
+                "date": [
+                  "4th of this month"
+                ],
+                "event_name": [
+                  "Blue Jays Vs Indians"
+                ],
+                "number_of_seats": [
+                  "4"
+                ]
+              }
+            }
+          }
+        ],
+        "speaker": "USER",
+        "utterance": "I'd like something on the 4th of this month. The event is the Blue Jays Vs Indians game. I'd like four tickets."
+      },
+      {
+        "frames": [
+          {
+            "actions": [
+              {
+                "act": "REQUEST",
+                "slot": "city_of_event",
+                "values": []
+              }
+            ],
+            "service": "Events_1",
+            "slots": []
+          }
+        ],
+        "speaker": "SYSTEM",
+        "utterance": "Do you have a certain city in mind that I should search in?"
+      },
+      {
+        "frames": [
+          {
+            "service": "Events_1",
+            "slots": [
+              {
+                "exclusive_end": 49,
+                "slot": "city_of_event",
+                "start": 36
+              },
+              {
+                "exclusive_end": 80,
+                "slot": "event_name",
+                "start": 64
+              }
+            ],
+            "state": {
+              "active_intent": "BuyEventTickets",
+              "requested_slots": [],
+              "slot_values": {
+                "city_of_event": [
+                  "New York City"
+                ],
+                "date": [
+                  "4th of this month"
+                ],
+                "event_name": [
+                  "Nycfc Vs Timbers"
+                ],
+                "number_of_seats": [
+                  "4"
+                ]
+              }
+            }
+          }
+        ],
+        "speaker": "USER",
+        "utterance": "I'd like to find some events around New York City. The event is Nycfc Vs Timbers."
+      },
+      {
+        "frames": [
+          {
+            "actions": [
+              {
+                "act": "CONFIRM",
+                "slot": "event_name",
+                "values": [
+                  "Nycfc Vs Timbers"
+                ]
+              },
+              {
+                "act": "CONFIRM",
+                "slot": "number_of_seats",
+                "values": [
+                  "4"
+                ]
+              },
+              {
+                "act": "CONFIRM",
+                "slot": "date",
+                "values": [
+                  "next Monday"
+                ]
+              },
+              {
+                "act": "CONFIRM",
+                "slot": "city_of_event",
+                "values": [
+                  "New York"
+                ]
+              }
+            ],
+            "service": "Events_1",
+            "slots": [
+              {
+                "exclusive_end": 33,
+                "slot": "event_name",
+                "start": 17
+              },
+              {
+                "exclusive_end": 86,
+                "slot": "date",
+                "start": 75
+              },
+              {
+                "exclusive_end": 118,
+                "slot": "city_of_event",
+                "start": 110
+              }
+            ]
+          }
+        ],
+        "speaker": "SYSTEM",
+        "utterance": "So, the event is Nycfc Vs Timbers, with 4 tickets in the reservation, it's next Monday, and it takes place in New York?"
+      },
+      {
+        "question": "At what time does it start?"
+      }
+    ],
+    "question": "At what time does it start?",
+    "truth": "At what time does Nycfc Vs Timbers start?",
+    "case": "coref"
+  }
