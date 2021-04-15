@@ -52,6 +52,8 @@ public class FullPipeline {
     private Map<String, LinkedHashMap<String, Double>> corefScore;
     private String corefQuery;
     private String corefStateReplaced;
+    private String ellipsisQuery;
+    private Map<Double, String> ellipsisRanking;
 
     public FullPipeline() throws IOException, JWNLException {
         init();
@@ -70,7 +72,7 @@ public class FullPipeline {
     }
 
     private void readStopWords() throws FileNotFoundException {
-        File f = new File("src/main/resources/dataFile/exampleDialog.json");
+        File f = new File("src/main/resources/dataFile/snowball.txt");
         stopWords = new HashSet<>();
         Scanner sc = new Scanner(f);
         while (sc.hasNextLine()) {
@@ -105,8 +107,13 @@ public class FullPipeline {
         coref();
         compareState();
         corefOutput();
+        if (!corefQuery.equalsIgnoreCase(question)) {
+            return new ExpansionOutput(question, corefQuery);
+        }
+        logger.info("Starting ellipsis...");
+        ellipsis();
 
-        return new ExpansionOutput(question, corefQuery);
+        return new ExpansionOutput(question, ellipsisQuery);
     }
 
     private void reset(JsonObject obj) {
@@ -117,6 +124,9 @@ public class FullPipeline {
         dialogObj = obj;
         question = dialogObj.get("question").getAsString();
         corefQuery = question;
+        ellipsisQuery = question;
+        corefStateReplaced = "";
+        ellipsisRanking = new TreeMap<>();
         JsonArray turns = dialogObj.get("turns").getAsJsonArray();
         String text = "";
         for (int i = 0; i < turns.size() - 1; i++) {
@@ -234,7 +244,7 @@ public class FullPipeline {
                         String key = word.split("\\|")[0];
 //                        key = stateConversion(key);
                         double kb = 0.0;
-                        if (key.equalsIgnoreCase("event")) {
+                        if (key.equalsIgnoreCase("event_name")) {
                             kb = KB(stateValue, "person");
                         }
                         unsorted.put(word, kb);
@@ -324,7 +334,7 @@ public class FullPipeline {
                         }
 //                        String GPTScore = scriptPython.runScript("\"" + GPT2String + "\"");
                         String newQ = question.replace(nounPhrase, stateValue);
-                        if (key.equalsIgnoreCase("event")) {
+                        if (key.equalsIgnoreCase("event_name")) {
                             kb = KB(key, nounPhrase);
                             score = (depth + sim + kb) / 3;
 //                            if (truth.toLowerCase().contains(stateValue.toLowerCase())) {
@@ -379,7 +389,7 @@ public class FullPipeline {
 //        ltrw.close();
     }
 
-    public void corefOutput() throws IOException { // prioritize pronoun and then output the highest score
+    private void corefOutput() throws IOException { // prioritize pronoun and then output the highest score
         String newQ = question;
         List<String> pronouns = Arrays.asList("he", "him", "his", "her", "she", "it", "its", "they", "them", "their", "that", "those");
         if (!corefScore.isEmpty()) {
@@ -430,6 +440,143 @@ public class FullPipeline {
         }
         corefQuery = newQ;
 //        this.GPT2String += "\"" + this.corefQueryForGPT2;
+    }
+
+    private void ellipsis() throws IOException, JWNLException, CloneNotSupportedException {
+//        FileWriter ltrw = new FileWriter(LEARN_TO_RANK_FILE,true);
+//        BufferedWriter ltrWriter = new BufferedWriter(ltrw);
+        Map<String, String> keyValuePair = new HashMap<>();
+        if (!question.endsWith("?")) {
+            if (question.endsWith(".")) {
+                question = question.substring(0, question.length() - 1);
+            }
+            question += "?";
+        }
+//        String truth = dialogObj.get("truth").getAsString();
+        JsonArray turns = dialogObj.get("turns").getAsJsonArray();
+        for (int i = 0; i < turns.size() - 1; i++) {
+            JsonArray frames = turns.get(i).getAsJsonObject().getAsJsonArray("frames");
+            for (int j = 0; j < frames.size(); j++) {
+                JsonObject frame = frames.get(j).getAsJsonObject();
+                if (frame.has("actions")) {
+                    JsonArray actions = frame.getAsJsonArray("actions");
+                    for (int k = 0; k < actions.size(); k++) {
+                        JsonObject action = actions.get(k).getAsJsonObject();
+                        String slot = action.get("slot").getAsString();
+                        if (!slot.equalsIgnoreCase("count")) {
+                            JsonArray values = action.getAsJsonArray("values");
+                            if (values.size() == 1) {
+                                String value = values.get(0).getAsString();
+                                keyValuePair.put(slot, value);
+                            }
+                        }
+                    }
+                }
+                if (frame.has("state")) {
+                    JsonObject slotValues = frame.getAsJsonObject("state").getAsJsonObject("slot_values");
+                    for (String key : slotValues.keySet()) {
+                        String value = slotValues.get(key).getAsJsonArray().get(0).getAsString();
+                        keyValuePair.put(key, value);
+                    }
+                }
+            }
+        }
+
+        IndexWord keyword = getKeyword(question);
+        String ellipsis = "";
+//        ScriptPythonForGPT2 scriptPython = new ScriptPythonForGPT2();
+        if (keyword.getPOS().equals(POS.VERB)) {
+            double maxScore = 0.0;
+            for (String key : keyValuePair.keySet()) {
+                double sim = glove.sim2Max(key, keyword.getLemma());
+//                System.out.println(keyword + " " + key + ": " + dist);
+                double kb = 0.0;
+                if (key.equalsIgnoreCase("event_name")) {
+                    kb = KB(keyValuePair.get(key), keyword.getLemma());
+                }
+                double score = (sim + kb) / 2;
+                if (score > maxScore) {
+                    maxScore = score;
+                    ellipsis = keyValuePair.get(key);
+                }
+//                String GPT2String = question.substring(0, question.length() - 1) + " " + key + "?";
+//                String GPTScore = scriptPython.runScript("\"" + GPT2String + "\"");
+//                String newQ = question.substring(0, question.lastIndexOf("?")) + " " + keyValuePair.get(key) + "?";
+//                if (truth.toLowerCase().contains(keyValuePair.get(key).toLowerCase())) {
+//                    if (caseType.equalsIgnoreCase("ellipsis")) {
+//                        ltrWriter.write("2 qid:" + (kk + 1) + " 1:0 2:" + String.format("%.4f", sim) + " 3:" + String.format("%.4f", kb) + " 4:" + String.format("%.4f", 1.0 / Double.parseDouble(GPTScore.substring(1, 7))) + " # " + newQ);
+//                    } else {
+//                        ltrWriter.write("1 qid:" + (kk + 1) + " 1:0 2:" + String.format("%.4f", sim) + " 3:" + String.format("%.4f", kb) + " 4:" + String.format("%.4f", 1.0 / Double.parseDouble(GPTScore.substring(1, 7))) + " # " + newQ);
+//                    }
+//                } else {
+//                    ltrWriter.write("0 qid:" + (kk + 1) + " 1:0 2:" + String.format("%.4f", sim) + " 3:" + String.format("%.4f", kb) + " 4:" + String.format("%.4f", 1.0 / Double.parseDouble(GPTScore.substring(1, 7))) + " # " + newQ);
+//                }
+//                ltrWriter.newLine();
+            }
+        } else if (keyword.getPOS().equals(POS.NOUN)) {
+            double maxScore = 0.0;
+            String prevKey = "";
+            for (String key : keyValuePair.keySet()) {
+                IndexWord keyWord = dictionary.lookupIndexWord(POS.NOUN, key);
+                if (key.equalsIgnoreCase("category") || key.equalsIgnoreCase("subcategory")) {
+                    keyWord = dictionary.lookupIndexWord(POS.NOUN, keyValuePair.get(key));
+                }
+                int dist = 1000;
+                try {
+                    RelationshipList list = RelationshipFinder.findRelationships(keyWord.getSenses().get(0), keyword.getSenses().get(0), PointerType.HYPERNYM);
+                    dist = list.get(0).getDepth();
+                } catch (NullPointerException e) {
+
+                }
+                double sim = glove.sim2Max(key, keyword.getLemma());
+                double score = (5.0 / dist + sim) / 2;
+                if (key.equalsIgnoreCase("category") || key.equalsIgnoreCase("subcategory")) {
+                    sim = glove.sim2Max(keyValuePair.get(key), keyword.getLemma());
+                    score = (5.0 / dist + sim) / 2;
+                }
+                if (key.equalsIgnoreCase("event_name")) {
+                    score = (5.0 / dist + glove.sim2Max(key, keyword.getLemma()) + KB(keyValuePair.get(key), keyword.getLemma())) / 3;
+                }
+//                double kb = 0.0;
+//                if (key.equalsIgnoreCase("event_name")) {
+//                    kb = KB(keyValuePair.get(key), keyWord.getLemma());
+//                }
+//                String GPT2String = question.substring(0, question.length() - 1) + " " + key + "?";
+//                String GPTScore = scriptPython.runScript("\"" + GPT2String + "\"");
+//                String newQ = question.substring(0, question.lastIndexOf("?")) + " " + keyValuePair.get(key) + "?";
+//                if (truth.toLowerCase().contains(keyValuePair.get(key).toLowerCase())) {
+//                    if (caseType.equalsIgnoreCase("ellipsis")) {
+//                        ltrWriter.write("2 qid:" + (kk + 1) + " 1:" + String.format("%.4f", 1.0 / dist) + " 2:" + String.format("%.4f", sim) + " 3:" + String.format("%.4f", kb) + " 4:" + String.format("%.4f", 1.0 / Double.parseDouble(GPTScore.substring(1, 7))) + " # " + newQ);
+//                    } else {
+//                        ltrWriter.write("1 qid:" + (kk + 1) + " 1:" + String.format("%.4f", 1.0 / dist) + " 2:" + String.format("%.4f", sim) + " 3:" + String.format("%.4f", kb) + " 4:" + String.format("%.4f", 1.0 / Double.parseDouble(GPTScore.substring(1, 7))) + " # " + newQ);
+//                    }
+//                } else {
+//                    ltrWriter.write("0 qid:" + (kk + 1) + " 1:"+ String.format("%.4f", 1.0 / dist) + " 2:" + String.format("%.4f", sim) + " 3:" + String.format("%.4f", kb) + " 4:" + String.format("%.4f", 1.0 / Double.parseDouble(GPTScore.substring(1, 7))) + " # " + newQ);
+//                }
+//                ltrWriter.newLine();
+                if (score > maxScore) {
+                    maxScore = score;
+                    ellipsis = keyValuePair.get(key);
+//                    ellipsisStateReplaced = key;
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Bad question: " + question);
+        }
+//        System.out.println(question + " ----------------- " + question.substring(0, question.lastIndexOf("?")).replace(keyword.getLemma(), keyword.getLemma().toUpperCase()) + " " + ellipsis + "? ----------------- " + truth);
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FILE, true));
+//        if (!this.corefReplace) {
+//            writeFile.write(question.substring(0, question.lastIndexOf("?")) + " " + ellipsis.toLowerCase() + "?|" + "ellipsis");
+//        }
+        String newQ = question.substring(0, question.lastIndexOf("?")) + " " + ellipsis + "?";
+        ellipsisQuery = newQ;
+//        this.ellipsisQueryForGPT2 = question.substring(0, question.lastIndexOf("?")) + " " + this.ellipsisStateReplaced + "?";
+//        writer.write(newQ);
+//        this.GPT2String += "|" + this.ellipsisQueryForGPT2 + "|" + this.truth + "\"";
+//        this.GPT2String = this.GPT2String.toLowerCase();
+//        ScriptPythonForGPT2 scriptPython = new ScriptPythonForGPT2();
+//        System.out.println(this.GPT2String); //coref|ellipsis|truth
+//        String corefScoreString = scriptPython.runScript(this.GPT2String);
     }
 
     private LinkedHashMap<String, Double> parseHuggingFaceScore(String s) {

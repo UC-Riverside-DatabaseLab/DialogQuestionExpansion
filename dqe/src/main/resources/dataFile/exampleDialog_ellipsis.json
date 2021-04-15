@@ -1,0 +1,413 @@
+{
+  "UUID": "8d367366-8df6-3aeb-a2c1-ecbe384574be",
+  "dialogue_id": "14_00080",
+  "services": [
+    "Events_1"
+  ],
+  "turns": [
+    {
+      "frames": [
+        {
+          "service": "Events_1",
+          "slots": [],
+          "state": {
+            "active_intent": "BuyEventTickets",
+            "requested_slots": [],
+            "slot_values": {}
+          }
+        }
+      ],
+      "speaker": "USER",
+      "utterance": "I'd like to purchase some event tickets."
+    },
+    {
+      "frames": [
+        {
+          "actions": [
+            {
+              "act": "REQUEST",
+              "slot": "number_of_seats",
+              "values": []
+            },
+            {
+              "act": "REQUEST",
+              "slot": "city_of_event",
+              "values": []
+            }
+          ],
+          "service": "Events_1",
+          "slots": []
+        }
+      ],
+      "speaker": "SYSTEM",
+      "utterance": "Let me assist you with that. Which city are you interested in attending an event. How many tickets will you need?"
+    },
+    {
+      "frames": [
+        {
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 50,
+              "slot": "city_of_event",
+              "start": 42
+            }
+          ],
+          "state": {
+            "active_intent": "BuyEventTickets",
+            "requested_slots": [],
+            "slot_values": {
+              "city_of_event": [
+                "New York"
+              ],
+              "number_of_seats": [
+                "3"
+              ]
+            }
+          }
+        }
+      ],
+      "speaker": "USER",
+      "utterance": "I am looking to purchase three tickets in New York."
+    },
+    {
+      "frames": [
+        {
+          "actions": [
+            {
+              "act": "REQUEST",
+              "slot": "date",
+              "values": []
+            },
+            {
+              "act": "REQUEST",
+              "slot": "event_name",
+              "values": []
+            }
+          ],
+          "service": "Events_1",
+          "slots": []
+        }
+      ],
+      "speaker": "SYSTEM",
+      "utterance": "When will you be visiting New York? Are you interested in a particular type of event?"
+    },
+    {
+      "frames": [
+        {
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 63,
+              "slot": "date",
+              "start": 49
+            },
+            {
+              "exclusive_end": 48,
+              "slot": "event_name",
+              "start": 30
+            }
+          ],
+          "state": {
+            "active_intent": "BuyEventTickets",
+            "requested_slots": [],
+            "slot_values": {
+              "city_of_event": [
+                "New York"
+              ],
+              "date": [
+                "next Wednesday"
+              ],
+              "event_name": [
+                "Greensky Bluegrass"
+              ],
+              "number_of_seats": [
+                "3"
+              ]
+            }
+          }
+        }
+      ],
+      "speaker": "USER",
+      "utterance": "Yes, I'm interested in seeing Greensky Bluegrass next Wednesday."
+    },
+    {
+      "frames": [
+        {
+          "actions": [
+            {
+              "act": "CONFIRM",
+              "slot": "event_name",
+              "values": [
+                "Greensky Bluegrass"
+              ]
+            },
+            {
+              "act": "CONFIRM",
+              "slot": "number_of_seats",
+              "values": [
+                "3"
+              ]
+            },
+            {
+              "act": "CONFIRM",
+              "slot": "date",
+              "values": [
+                "next Wednesday"
+              ]
+            },
+            {
+              "act": "CONFIRM",
+              "slot": "city_of_event",
+              "values": [
+                "New York"
+              ]
+            }
+          ],
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 43,
+              "slot": "event_name",
+              "start": 25
+            },
+            {
+              "exclusive_end": 74,
+              "slot": "date",
+              "start": 60
+            },
+            {
+              "exclusive_end": 55,
+              "slot": "city_of_event",
+              "start": 47
+            }
+          ]
+        }
+      ],
+      "speaker": "SYSTEM",
+      "utterance": "You'd like 3 tickets for Greensky Bluegrass in New York for next Wednesday. Did I get that right?"
+    },
+    {
+      "frames": [
+        {
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 43,
+              "slot": "city_of_event",
+              "start": 36
+            }
+          ],
+          "state": {
+            "active_intent": "BuyEventTickets",
+            "requested_slots": [],
+            "slot_values": {
+              "city_of_event": [
+                "Seattle"
+              ],
+              "date": [
+                "next Wednesday"
+              ],
+              "event_name": [
+                "Greensky Bluegrass"
+              ],
+              "number_of_seats": [
+                "3"
+              ]
+            }
+          }
+        }
+      ],
+      "speaker": "USER",
+      "utterance": "I'm sorry. I forgot that I'll be in Seattle, not New York."
+    },
+    {
+      "frames": [
+        {
+          "actions": [
+            {
+              "act": "CONFIRM",
+              "slot": "date",
+              "values": [
+                "next Wednesday"
+              ]
+            },
+            {
+              "act": "CONFIRM",
+              "slot": "city_of_event",
+              "values": [
+                "Seattle"
+              ]
+            }
+          ],
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 47,
+              "slot": "date",
+              "start": 33
+            },
+            {
+              "exclusive_end": 58,
+              "slot": "city_of_event",
+              "start": 51
+            }
+          ]
+        }
+      ],
+      "speaker": "SYSTEM",
+      "utterance": "Okay, you would like tickets for next Wednesday in Seattle. Is that correct?"
+    },
+    {
+      "frames": [
+        {
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 59,
+              "slot": "date",
+              "start": 42
+            }
+          ],
+          "state": {
+            "active_intent": "BuyEventTickets",
+            "requested_slots": [],
+            "slot_values": {
+              "city_of_event": [
+                "Seattle"
+              ],
+              "date": [
+                "3rd of this month"
+              ],
+              "event_name": [
+                "Greensky Bluegrass"
+              ],
+              "number_of_seats": [
+                "3"
+              ]
+            }
+          }
+        }
+      ],
+      "speaker": "USER",
+      "utterance": "I'm sorry, can we change that date to the 3rd of this month?"
+    },
+    {
+      "frames": [
+        {
+          "actions": [
+            {
+              "act": "CONFIRM",
+              "slot": "event_name",
+              "values": [
+                "Greensky Bluegrass"
+              ]
+            },
+            {
+              "act": "CONFIRM",
+              "slot": "date",
+              "values": [
+                "day after tomorrow"
+              ]
+            }
+          ],
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 80,
+              "slot": "event_name",
+              "start": 62
+            },
+            {
+              "exclusive_end": 103,
+              "slot": "date",
+              "start": 85
+            }
+          ]
+        }
+      ],
+      "speaker": "SYSTEM",
+      "utterance": "Let me check to see if I've got this right. You'd like to see Greensky Bluegrass the day after tomorrow. Is that correct?"
+    },
+    {
+      "frames": [
+        {
+          "service": "Events_1",
+          "slots": [],
+          "state": {
+            "active_intent": "BuyEventTickets",
+            "requested_slots": [
+              "address_of_location",
+              "event_location"
+            ],
+            "slot_values": {
+              "city_of_event": [
+                "Seattle"
+              ],
+              "date": [
+                "3rd of this month",
+                "day after tomorrow"
+              ],
+              "event_name": [
+                "Greensky Bluegrass"
+              ],
+              "number_of_seats": [
+                "3"
+              ]
+            }
+          }
+        }
+      ],
+      "speaker": "USER",
+      "utterance": "Absolutely. Can you tell me the name and address of the venue that is hosting this?"
+    },
+    {
+      "frames": [
+        {
+          "actions": [
+            {
+              "act": "INFORM",
+              "slot": "address_of_location",
+              "values": [
+                "5500 Phinney Avenue North"
+              ]
+            },
+            {
+              "act": "INFORM",
+              "slot": "event_location",
+              "values": [
+                "Flamingo Lot"
+              ]
+            },
+            {
+              "act": "NOTIFY_SUCCESS",
+              "slot": "",
+              "values": []
+            }
+          ],
+          "service": "Events_1",
+          "slots": [
+            {
+              "exclusive_end": 43,
+              "slot": "address_of_location",
+              "start": 18
+            },
+            {
+              "exclusive_end": 59,
+              "slot": "event_location",
+              "start": 47
+            }
+          ]
+        }
+      ],
+      "speaker": "SYSTEM",
+      "utterance": "Yes. The venue is 5500 Phinney Avenue North at Flamingo Lot. Your tickets are booked. Have fun!"
+    },
+    {
+      "question": "Are children allowed to attend?"
+    }
+  ],
+  "question": "Are children allowed to attend?",
+  "truth": "Are children allowed to attend Greensky Bluegrass?",
+  "case": "ellipsis"
+}
